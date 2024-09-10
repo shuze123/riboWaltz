@@ -300,11 +300,13 @@ region_psite <- function(data, annotation, sample, multisamples = "average",
   
   if(identical(plot_style, "stack")){
     plot <- plot + geom_bar(stat = "identity", color = "white", width = 0.65,
-                            size = 0.025 * bs, position = position_stack(reverse = TRUE))
+                            # size = 0.025 * bs, 
+                            position = position_stack(reverse = TRUE))
   } else {
     plot <- plot +
       geom_bar(stat = "identity", color = "white",
-                            size = 0.025 * bs, position = position_dodge(0.9)) +
+                            # size = 0.025 * bs, 
+               position = position_dodge(0.9)) +
       geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
                         ymax = mean_scaled_count + se_scaled_count,
                         color = region),
@@ -315,7 +317,8 @@ region_psite <- function(data, annotation, sample, multisamples = "average",
   
   plot <- plot +
     scale_fill_manual(values = colour) +
-    theme_bw(base_size = bs) +
+    # theme_bw(base_size = bs) +
+    theme_bw() +
     scale_x_discrete(breaks = unique(plot_dt$sample)) +
     facet_grid( . ~ class, scales = "free", space="free_x") +
     ggh4x::force_panelsizes(cols = c(length(unique(plot_dt$sample))-1, 1), 
