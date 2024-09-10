@@ -754,15 +754,33 @@ frame_psite_length <- function(data, annotation, sample,
                             breaks = c(zmin, zmin/2 + zmax/2, zmax),
                             labels = c(round(zmin), round(zmin/2 + zmax/2), round(zmax))) +
         labs(title = samp, x = "Frame", y = "Read length") +
-        theme_bw(base_size = 20) +
-        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-              legend.position = "right", plot.title = element_text(hjust = 0.5)) +
+        # theme_bw(base_size = 20) +
+        theme_bw() +
+        theme(legend.position = "right", legend.key.size = unit(12, "pt"),
+              legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+              legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+              axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+              axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+              axis.text.x = element_text(size = 8, family = "ArialMT", colour = "black"),
+              axis.text.y = element_text(size = 8, family = "ArialMT", colour = "black"),
+              plot.title = element_text(size = 10, hjust = 0.5, family = "ArialMT", colour = "black"),
+              line = element_line(linewidth = 1/2.134),
+              panel.background = element_blank(), plot.background = element_blank(),
+              legend.background = element_blank(), legend.box.background = element_blank(),
+              panel.grid = element_blank()) +
         scale_y_continuous(limits = c(minlen - 0.5, maxlen + 0.5),
                            breaks = seq(minlen + ((minlen) %% 2),maxlen,by = max(2, floor((maxlen - minlen) / 7))))
       
       if(identical(region, "all")) {
-        plot <- plot + facet_grid(. ~ region) + 
-          theme(strip.background = element_blank())
+        plot <- plot + facet_grid(. ~ region) +
+          ggh4x::force_panelsizes(total_width = unit(9, "cm"), 
+                                  total_height = unit(3, "cm")) + 
+          theme(strip.background = element_blank(),
+                strip.text = element_text(size = 8, family = "ArialMT", colour = "black"))
+      } else {
+        plot <- plot +
+          ggh4x::force_panelsizes(total_width = unit(3, "cm"), 
+                                  total_height = unit(3, "cm"))
       }
       
       output[[paste0("plot_", samp)]] <- plot
@@ -775,7 +793,8 @@ frame_psite_length <- function(data, annotation, sample,
                           breaks = c(zmin, zmin/2 + zmax/2, zmax),
                           labels = c(round(zmin), round(zmin/2 + zmax/2), round(zmax))) +
       labs(x = "Frame", y = "Read length") +
-      theme_bw(base_size = 20) +
+      # theme_bw(base_size = 20) +
+      theme_bw() +
       theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
             legend.position = "top", legend.margin=margin(0,0,0,0), legend.box.margin=margin(5,0,-5,0)) +
       scale_y_continuous(limits = c(minlen - 0.5, maxlen + 0.5),
@@ -783,16 +802,24 @@ frame_psite_length <- function(data, annotation, sample,
     
     if(identical(region, "all")) {
       if(identical(plot_style, "facet")){
-        plot <- plot + facet_grid(sample ~ region)
+        plot <- plot + facet_grid(sample ~ region) +
+          ggh4x::force_panelsizes(total_width = unit(9, "cm"), 
+                                  total_height = unit(length(unique(plot_dt$sample))*3, "cm"))
       } else {
-        plot <- plot + facet_grid(. ~ region)
+        plot <- plot + facet_grid(. ~ region) +
+          ggh4x::force_panelsizes(total_width = unit(9, "cm"), 
+                                  total_height = unit(3, "cm"))
       }
-      plot <- plot + theme(strip.background = element_blank())
+      plot <- plot + theme(strip.background = element_blank(),
+                           strip.text = element_text(size = 8, family = "ArialMT", colour = "black"))
     } else {
       if(identical(plot_style, "facet")){
-        plot <- plot + facet_wrap(sample ~ .)
+        plot <- plot + facet_wrap(sample ~ .) +
+          ggh4x::force_panelsizes(total_width = unit(length(unique(plot_dt$sample))*3, "cm"), 
+                                  total_height = unit(3, "cm"))
       }
-      plot <- plot + theme(strip.background = element_blank())
+      plot <- plot + theme(strip.background = element_blank(),
+                           strip.text = element_text(size = 8, family = "ArialMT", colour = "black"))
     }
     
     output[["plot"]] <- plot
