@@ -744,20 +744,21 @@ frame_psite_length <- function(data, annotation, sample,
   options(warn=-1)
   
   if(plot_style == "split"){ 
+    i <- 0
     for(samp in unique(plot_dt$sample)){ # generate a plot for each sample and store it
-      sub_plot_dt <- plot_dt[sample == samp]
+      i <- i + 1
+      sel_col = colour[i]
       
-      plot <- ggplot(sub_plot_dt, aes(as.factor(frame), length)) +
-        geom_tile(aes(fill = mean_scaled_count)) +
-        scale_fill_gradient("% P-sites", low = "white", high = colour,
-                            limits = c(zmin, zmax),
-                            breaks = c(zmin, zmin/2 + zmax/2, zmax),
-                            labels = c(round(zmin), round(zmin/2 + zmax/2), round(zmax))) +
-        labs(title = samp, x = "Frame", y = "Read length") +
-        # theme_bw(base_size = 20) +
+      sub_plot_dt <- plot_dt[sample == samp]
+      plot <- ggplot(sub_plot_dt, aes(x = as.factor(frame), y = mean_scaled_count)) +
+        geom_bar(stat = "identity", fill = sel_col, width = 0.8) +
+        geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
+                          ymax = mean_scaled_count + se_scaled_count),
+                      width = 0.35, linewidth = 1.1, na.rm = T, color = sel_col,
+                      show.legend = F) +
+        labs(title = samp, x = "Frame", y = "% P-sites") +
         theme_bw() +
-        theme(legend.position = "right", legend.key.size = unit(12, "pt"),
-              legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+        theme(legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
               legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
               axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
               axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
@@ -767,9 +768,7 @@ frame_psite_length <- function(data, annotation, sample,
               line = element_line(linewidth = 1/2.134),
               panel.background = element_blank(), plot.background = element_blank(),
               legend.background = element_blank(), legend.box.background = element_blank(),
-              panel.grid = element_blank()) +
-        scale_y_continuous(limits = c(minlen - 0.5, maxlen + 0.5),
-                           breaks = seq(minlen + ((minlen) %% 2),maxlen,by = max(2, floor((maxlen - minlen) / 7))))
+              panel.grid = element_blank())
       
       if(identical(region, "all")) {
         plot <- plot + facet_grid(. ~ region) +
@@ -777,46 +776,74 @@ frame_psite_length <- function(data, annotation, sample,
                                   total_height = unit(3, "cm")) + 
           theme(strip.background = element_blank(),
                 strip.text = element_text(size = 8, family = "ArialMT", colour = "black"))
-      } else {
-        plot <- plot +
-          ggh4x::force_panelsizes(total_width = unit(3, "cm"), 
-                                  total_height = unit(3, "cm"))
       }
       
       output[[paste0("plot_", samp)]] <- plot
     }
-  }  else {
-    plot <- ggplot(plot_dt, aes(frame, length)) +
-      geom_tile(aes(fill = mean_scaled_count)) +
-      scale_fill_gradient("% P-sites", low = "white", high = colour,
-                          limits = c(zmin, zmax),
-                          breaks = c(zmin, zmin/2 + zmax/2, zmax),
-                          labels = c(round(zmin), round(zmin/2 + zmax/2), round(zmax))) +
-      labs(x = "Frame", y = "Read length") +
-      # theme_bw(base_size = 20) +
+  } else {
+    
+    if(identical(plot_style, "mirror")) {
+      plot_dt[sample == unique(plot_dt$sample)[2], mean_scaled_count := -mean_scaled_count]
+    }
+    
+    plot <- ggplot(plot_dt, aes(x = as.factor(frame), y = mean_scaled_count, fill = sample))
+    
+    if(plot_style %in% c("facet", "mirror")) {
+      plot <- plot + geom_bar(stat = "identity", width = 0.8) +
+        geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
+                          ymax = mean_scaled_count + se_scaled_count, color = sample),
+                      width = 0.35, linewidth = 1.1, na.rm = T)
+      if(identical(plot_style, "mirror")){
+        plot <- plot + geom_hline(yintercept = 0, linetype = 2, color = "gray20", linewidth = 1/2.134)
+      }
+    } else {
+      plot <- plot + geom_bar(stat = "identity", position = position_dodge(0.9)) +
+        geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
+                          ymax = mean_scaled_count + se_scaled_count, color = sample),
+                      width = 0.35, linewidth = 1.1, na.rm = T, position = position_dodge(0.9))
+    }
+    
+    plot <- plot + labs(x = "Frame", y = "% P-sites") +
       theme_bw() +
-      theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-            legend.position = "top", legend.margin=margin(0,0,0,0), legend.box.margin=margin(5,0,-5,0)) +
-      scale_y_continuous(limits = c(minlen - 0.5, maxlen + 0.5),
-                         breaks = seq(minlen + ((minlen) %% 2),maxlen,by = max(2, floor((maxlen - minlen) / 7))))
+      theme(legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+            legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+            axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+            axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+            axis.text.x = element_text(size = 8, family = "ArialMT", colour = "black"),
+            axis.text.y = element_text(size = 8, family = "ArialMT", colour = "black"),
+            plot.title = element_text(size = 10, hjust = 0.5, family = "ArialMT", colour = "black"),
+            line = element_line(linewidth = 1/2.134),
+            panel.background = element_blank(), plot.background = element_blank(),
+            legend.background = element_blank(), legend.box.background = element_blank(),
+            panel.grid = element_blank()) +
+      scale_fill_manual(values = colour) + 
+      scale_color_manual(values = colour) +
+      scale_y_continuous(labels = abs)
+    
+    if(uniqueN(colour) > 1 & plot_style != "facet"){
+      plot <- plot + theme(legend.position = "right", legend.title = element_blank(),
+                           legend.background = element_blank())
+    } else {
+      plot <- plot + theme(legend.position = "none")
+    }
     
     if(identical(region, "all")) {
       if(identical(plot_style, "facet")){
         plot <- plot + facet_grid(sample ~ region) +
           ggh4x::force_panelsizes(total_width = unit(9, "cm"), 
-                                  total_height = unit(length(unique(plot_dt$sample))*3, "cm"))
+                                  total_height = unit(6, "cm"))
       } else {
         plot <- plot + facet_grid(. ~ region) +
           ggh4x::force_panelsizes(total_width = unit(9, "cm"), 
-                                  total_height = unit(3, "cm"))
+                                  total_height = unit(5, "cm"))
       }
       plot <- plot + theme(strip.background = element_blank(),
                            strip.text = element_text(size = 8, family = "ArialMT", colour = "black"))
     } else {
       if(identical(plot_style, "facet")){
-        plot <- plot + facet_wrap(sample ~ .) +
+        plot <- plot + facet_wrap(sample ~ ., ncol = ceiling(sqrt(length(sample)))) +
           ggh4x::force_panelsizes(total_width = unit(length(unique(plot_dt$sample))*3, "cm"), 
-                                  total_height = unit(3, "cm"))
+                                  total_height = unit(5, "cm"))
       }
       plot <- plot + theme(strip.background = element_blank(),
                            strip.text = element_text(size = 8, family = "ArialMT", colour = "black"))
