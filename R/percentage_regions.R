@@ -318,13 +318,25 @@ region_psite <- function(data, annotation, sample, multisamples = "average",
     theme_bw(base_size = bs) +
     scale_x_discrete(breaks = unique(plot_dt$sample)) +
     facet_grid( . ~ class, scales = "free", space="free_x") +
+    ggh4x::force_panelsizes(cols = c(length(unique(plot_dt$sample))-1, 1), 
+                            total_width = unit(length(unique(plot_dt$sample))*1.5, "cm"), 
+                            total_height = unit(6, "cm")) +
     scale_y_continuous("% P-sites", sec.axis = sec_axis(~ . * 1 , name = "% nucleotides")) + 
     theme(axis.title.x = element_blank(), legend.title = element_blank(),
-          panel.grid.minor.x = element_blank(), panel.grid.major.x = element_blank(),
           strip.background = element_blank(), strip.text = element_blank(),
           legend.position = "top", legend.margin = margin(0,0,-5,0),
           legend.box.margin = margin(5,0,-10,0),
-          legend.text = element_text(margin = margin(l = -10, unit = "pt")))
+          legend.text = element_text(size = 8, family = "ArialMT", colour = "black",
+                                     margin = margin(l = 0, unit = "pt")),
+          axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+          axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+          axis.text.x = element_text(size = 8, family = "ArialMT", colour = "black"),
+          axis.text.y = element_text(size = 8, family = "ArialMT", colour = "black"),
+          plot.title = element_text(size = 10, hjust = 0.5, family = "ArialMT", colour = "black"),
+          line = element_line(linewidth = 1/2.134),
+          panel.background = element_blank(), plot.background = element_blank(),
+          legend.background = element_blank(), legend.box.background = element_blank(),
+          panel.grid = element_blank())
   plot
   
   output[["plot"]] <- plot
