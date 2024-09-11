@@ -362,7 +362,8 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
                       show.legend = F) +
         labs(title = samp, x = "Frame", y = "% P-sites") +
         theme_bw() +
-        theme(legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+        theme(legend.key.size = unit(12, "pt"),
+              legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
               legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
               axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
               axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
@@ -409,7 +410,8 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
     
     plot <- plot + labs(x = "Frame", y = "% P-sites") +
       theme_bw() +
-      theme(legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+      theme(legend.key.size = unit(12, "pt"),
+            legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
             legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
             axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
             axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
