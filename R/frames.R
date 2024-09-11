@@ -358,7 +358,7 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
         geom_bar(stat = "identity", fill = sel_col, width = 0.8) +
         geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
                           ymax = mean_scaled_count + se_scaled_count),
-                      width = 0.35, linewidth = 1.1, na.rm = T, color = sel_col,
+                      width = 0.35, linewidth = 1/2.134, na.rm = T, color = sel_col,
                       show.legend = F) +
         labs(title = samp, x = "Frame", y = "% P-sites") +
         theme_bw(base_size = 27.5) +
@@ -384,15 +384,15 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
         plot <- plot + geom_bar(stat = "identity", width = 0.8) +
           geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
                             ymax = mean_scaled_count + se_scaled_count, color = sample),
-                        width = 0.35, linewidth = 1.1, na.rm = T)
+                        width = 0.35, linewidth = 1/2.134, na.rm = T)
         if(identical(plot_style, "mirror")){
-          plot <- plot + geom_hline(yintercept = 0, linetype = 2, color = "gray20")
+          plot <- plot + geom_hline(yintercept = 0, linetype = 2, color = "gray20", linewidth = 1/2.134)
         }
       } else {
         plot <- plot + geom_bar(stat = "identity", position = position_dodge(0.9)) +
           geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
                             ymax = mean_scaled_count + se_scaled_count, color = sample),
-                        width = 0.35, linewidth = 1.1, na.rm = T, position = position_dodge(0.9))
+                        width = 0.35, linewidth = 1/2.134, na.rm = T, position = position_dodge(0.9))
       }
     
     plot <- plot + labs(x = "Frame", y = "% P-sites") +
@@ -754,7 +754,7 @@ frame_psite_length <- function(data, annotation, sample,
         geom_bar(stat = "identity", fill = sel_col, width = 0.8) +
         geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
                           ymax = mean_scaled_count + se_scaled_count),
-                      width = 0.35, linewidth = 1.1, na.rm = T, color = sel_col,
+                      width = 0.35, linewidth = 1/2.134, na.rm = T, color = sel_col,
                       show.legend = F) +
         labs(title = samp, x = "Frame", y = "% P-sites") +
         theme_bw() +
@@ -792,7 +792,7 @@ frame_psite_length <- function(data, annotation, sample,
       plot <- plot + geom_bar(stat = "identity", width = 0.8) +
         geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
                           ymax = mean_scaled_count + se_scaled_count, color = sample),
-                      width = 0.35, linewidth = 1.1, na.rm = T)
+                      width = 0.35, linewidth = 1/2.134, na.rm = T)
       if(identical(plot_style, "mirror")){
         plot <- plot + geom_hline(yintercept = 0, linetype = 2, color = "gray20", linewidth = 1/2.134)
       }
@@ -800,7 +800,7 @@ frame_psite_length <- function(data, annotation, sample,
       plot <- plot + geom_bar(stat = "identity", position = position_dodge(0.9)) +
         geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
                           ymax = mean_scaled_count + se_scaled_count, color = sample),
-                      width = 0.35, linewidth = 1.1, na.rm = T, position = position_dodge(0.9))
+                      width = 0.35, linewidth = 1/2.134, na.rm = T, position = position_dodge(0.9))
     }
     
     plot <- plot + labs(x = "Frame", y = "% P-sites") +
