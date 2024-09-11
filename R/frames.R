@@ -111,7 +111,7 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
     data_tmp <- list()
     for(i in names(data)){
       data_tmp[[i]] <- as.data.table(data[[i]])[, c("width", "strand") := NULL
-                                                ][, seqnames := as.character(seqnames)]
+      ][, seqnames := as.character(seqnames)]
       setnames(data_tmp[[i]], c("seqnames", "start", "end"), c("transcript", "end5", "end3"))
     }
     data <- data_tmp
@@ -204,7 +204,7 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
   
   # select transcripts
   l_transcripts <- as.character(annotation[l_utr5 > 0 & l_cds > 0 &
-                                           l_cds %% 3 == 0 & l_utr3 > 0,
+                                             l_cds %% 3 == 0 & l_utr3 > 0,
                                            transcript])
   
   if (length(transcripts) == 0) {
@@ -217,7 +217,7 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
   if(length(length_range) == 0){
     for(samp in as.character(unlist(sample))){
       dt <- data[[samp]][transcript %in% c_transcripts]
-
+      
       if(length(length_range) == 0){
         length_range <- seq(quantile(dt$length, (1 - cl/100)/2),
                             quantile(dt$length, 1 - (1 - cl/100)/2))
@@ -228,7 +228,7 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
       }
     }
   }
-
+  
   xmin = min(length_range)
   xmax = max(length_range)
   
@@ -289,8 +289,8 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
     frame_dt <- frame_dt[CJ(psite_region = unique(psite_region), frame = c(0, 1, 2)),
                          list(count = .N), by = .EACHI]
     frame_dt <- frame_dt[, scaled_count := (count / sum(count)) * 100, by = .(region = psite_region)
-                           ][is.na(scaled_count), scaled_count := 0]
-
+    ][is.na(scaled_count), scaled_count := 0]
+    
     frame_dt[, tmp_samp := samp]
     
     final_dt <- rbind(final_dt, frame_dt)
@@ -298,11 +298,11 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
   
   if(identical(region, "all")){
     final_dt[, psite_region := factor(psite_region,
-                                levels = c("5utr", "cds", "3utr"),
-                                labels = c("5' UTR", "CDS", "3' UTR"))]
+                                      levels = c("5utr", "cds", "3utr"),
+                                      labels = c("5' UTR", "CDS", "3' UTR"))]
   } else {
     final_dt[, psite_region := ifelse(psite_region == "5utr", "5' UTR",
-                                ifelse(psite_region == "cds", "CDS", "3' UTR"))]
+                                      ifelse(psite_region == "cds", "CDS", "3' UTR"))]
   }
   
   final_dt <- final_dt[order(match(tmp_samp, as.character(unlist(sample))), psite_region, frame)]
@@ -335,7 +335,7 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
     
   } else {
     plot_dt <- final_dt[, sample := tmp_samp
-                        ][, se_scaled_count := NA]
+    ][, se_scaled_count := NA]
     setnames(plot_dt, "scaled_count", "mean_scaled_count")
     
     output[["plot_dt"]] <- copy(plot_dt[, c("sample", "region", "frame", "mean_scaled_count")])
@@ -358,16 +358,28 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
         geom_bar(stat = "identity", fill = sel_col, width = 0.8) +
         geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
                           ymax = mean_scaled_count + se_scaled_count),
-                      width = 0.35, linewidth = 1/2.134, na.rm = T, color = sel_col,
+                      width = 0.35, linewidth = 1.1, na.rm = T, color = sel_col,
                       show.legend = F) +
         labs(title = samp, x = "Frame", y = "% P-sites") +
-        theme_bw(base_size = 27.5) +
-        theme(panel.grid.minor.x = element_blank(), panel.grid.major.x = element_blank(),
-              plot.title = element_text(hjust = 0.5))
+        theme_bw() +
+        theme(legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+              legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+              axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+              axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+              axis.text.x = element_text(size = 8, family = "ArialMT", colour = "black"),
+              axis.text.y = element_text(size = 8, family = "ArialMT", colour = "black"),
+              plot.title = element_text(size = 10, hjust = 0.5, family = "ArialMT", colour = "black"),
+              line = element_line(linewidth = 1/2.134),
+              panel.background = element_blank(), plot.background = element_blank(),
+              legend.background = element_blank(), legend.box.background = element_blank(),
+              panel.grid = element_blank())
       
       if(identical(region, "all")) {
-        plot <- plot + facet_grid(. ~ region) + 
-          theme(strip.background = element_blank())
+        plot <- plot + facet_grid(. ~ region) +
+          ggh4x::force_panelsizes(total_width = unit(9, "cm"), 
+                                  total_height = unit(3, "cm")) + 
+          theme(strip.background = element_blank(),
+                strip.text = element_text(size = 8, family = "ArialMT", colour = "black"))
       }
       
       output[[paste0("plot_", samp)]] <- plot
@@ -379,25 +391,35 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
     }
     
     plot <- ggplot(plot_dt, aes(x = as.factor(frame), y = mean_scaled_count, fill = sample))
-      
-      if(plot_style %in% c("facet", "mirror")) {
-        plot <- plot + geom_bar(stat = "identity", width = 0.8) +
-          geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
-                            ymax = mean_scaled_count + se_scaled_count, color = sample),
-                        width = 0.35, linewidth = 1/2.134, na.rm = T)
-        if(identical(plot_style, "mirror")){
-          plot <- plot + geom_hline(yintercept = 0, linetype = 2, color = "gray20", linewidth = 1/2.134)
-        }
-      } else {
-        plot <- plot + geom_bar(stat = "identity", position = position_dodge(0.9)) +
-          geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
-                            ymax = mean_scaled_count + se_scaled_count, color = sample),
-                        width = 0.35, linewidth = 1/2.134, na.rm = T, position = position_dodge(0.9))
+    
+    if(plot_style %in% c("facet", "mirror")) {
+      plot <- plot + geom_bar(stat = "identity", width = 0.8) +
+        geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
+                          ymax = mean_scaled_count + se_scaled_count, color = sample),
+                      width = 0.35, linewidth = 1.1, na.rm = T)
+      if(identical(plot_style, "mirror")){
+        plot <- plot + geom_hline(yintercept = 0, linetype = 2, color = "gray20", linewidth = 1/2.134)
       }
+    } else {
+      plot <- plot + geom_bar(stat = "identity", position = position_dodge(0.9)) +
+        geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
+                          ymax = mean_scaled_count + se_scaled_count, color = sample),
+                      width = 0.35, linewidth = 1.1, na.rm = T, position = position_dodge(0.9))
+    }
     
     plot <- plot + labs(x = "Frame", y = "% P-sites") +
-      theme_bw(base_size = 27.5) +
-      theme(panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank()) +
+      theme_bw() +
+      theme(legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+            legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+            axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+            axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+            axis.text.x = element_text(size = 8, family = "ArialMT", colour = "black"),
+            axis.text.y = element_text(size = 8, family = "ArialMT", colour = "black"),
+            plot.title = element_text(size = 10, hjust = 0.5, family = "ArialMT", colour = "black"),
+            line = element_line(linewidth = 1/2.134),
+            panel.background = element_blank(), plot.background = element_blank(),
+            legend.background = element_blank(), legend.box.background = element_blank(),
+            panel.grid = element_blank()) +
       scale_fill_manual(values = colour) + 
       scale_color_manual(values = colour) +
       scale_y_continuous(labels = abs)
@@ -411,16 +433,24 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
     
     if(identical(region, "all")) {
       if(identical(plot_style, "facet")){
-        plot <- plot + facet_grid(sample ~ region)
+        plot <- plot + facet_grid(sample ~ region) +
+          ggh4x::force_panelsizes(total_width = unit(9, "cm"), 
+                                  total_height = unit(6, "cm"))
       } else {
-        plot <- plot + facet_grid(. ~ region)
+        plot <- plot + facet_grid(. ~ region) +
+          ggh4x::force_panelsizes(total_width = unit(9, "cm"), 
+                                  total_height = unit(5, "cm"))
       }
-      plot <- plot + theme(strip.background = element_blank())
+      plot <- plot + theme(strip.background = element_blank(),
+                           strip.text = element_text(size = 8, family = "ArialMT", colour = "black"))
     } else {
       if(identical(plot_style, "facet")){
-        plot <- plot + facet_wrap(sample ~ ., ncol = ceiling(sqrt(length(sample))))
+        plot <- plot + facet_wrap(sample ~ ., ncol = ceiling(sqrt(length(sample)))) +
+          ggh4x::force_panelsizes(total_width = unit(length(unique(plot_dt$sample))*3, "cm"), 
+                                  total_height = unit(5, "cm"))
       }
-      plot <- plot + theme(strip.background = element_blank())
+      plot <- plot + theme(strip.background = element_blank(),
+                           strip.text = element_text(size = 8, family = "ArialMT", colour = "black"))
     }
     
     output[["plot"]] <- plot
@@ -534,6 +564,13 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
 #' @import data.table
 #' @import ggplot2
 #' @export
+frames_stratified <- frame_psite_length(reads_psite_list, annotation_dt,
+                                        sample = input_samples,
+                                        multisamples = "average",
+                                        plot_style = "facet",
+                                        region = "all",
+                                        cl = 85, colour = "#172969")
+
 frame_psite_length <- function(data, annotation, sample,
                                multisamples = "average", plot_style = "split",
                                transcripts = NULL, region = "all",
@@ -544,7 +581,7 @@ frame_psite_length <- function(data, annotation, sample,
     data_tmp <- list()
     for(i in names(data)){
       data_tmp[[i]] <- as.data.table(data[[i]])[, c("width", "strand") := NULL
-                                                ][, seqnames := as.character(seqnames)]
+      ][, seqnames := as.character(seqnames)]
       setnames(data_tmp[[i]], c("seqnames", "start", "end"), c("transcript", "end5", "end3"))
     }
     data <- data_tmp
@@ -607,7 +644,7 @@ frame_psite_length <- function(data, annotation, sample,
   
   # select transcripts
   l_transcripts <- as.character(annotation[l_utr5 > 0 & l_cds > 0 &
-                                           l_cds %% 3 == 0 & l_utr3 > 0,
+                                             l_cds %% 3 == 0 & l_utr3 > 0,
                                            transcript])
   
   if (length(transcripts) == 0) {
@@ -620,7 +657,7 @@ frame_psite_length <- function(data, annotation, sample,
   if(length(length_range) == 0){
     for(samp in as.character(unlist(sample))){
       dt <- data[[samp]][transcript %in% c_transcripts]
-
+      
       if(length(length_range) == 0){
         length_range <- seq(quantile(dt$length, (1 - cl/100)/2),
                             quantile(dt$length, 1 - (1 - cl/100)/2))
@@ -680,8 +717,8 @@ frame_psite_length <- function(data, annotation, sample,
   for(samp in as.character(unlist(sample))) {
     
     frame_dt <- data[[samp]][length %in% length_range
-                       ][transcript %in% c_transcripts]
-
+    ][transcript %in% c_transcripts]
+    
     if(!identical(region, "all")){
       frame_dt <- frame_dt[psite_region == region]
     }
@@ -693,7 +730,7 @@ frame_psite_length <- function(data, annotation, sample,
                             length = length_range, frame = c(0, 1, 2)),
                          list(count = .N), by = .EACHI]
     frame_dt <- frame_dt[, scaled_count := (count / sum(count)) * 100, by = .(length, psite_region)
-                         ][is.na(scaled_count), scaled_count := 0]
+    ][is.na(scaled_count), scaled_count := 0]
     
     frame_dt[, tmp_samp := samp]
     
@@ -729,7 +766,7 @@ frame_psite_length <- function(data, annotation, sample,
     plot_dt <- final_dt[, .(mean_scaled_count = mean(scaled_count)), by = .(length, region, frame, sample)]
   } else {
     plot_dt <- final_dt[, sample := tmp_samp
-                        ][, se_scaled_count := NA]
+    ][, se_scaled_count := NA]
     setnames(plot_dt, "scaled_count", "mean_scaled_count")
   }
   
@@ -744,21 +781,19 @@ frame_psite_length <- function(data, annotation, sample,
   options(warn=-1)
   
   if(plot_style == "split"){ 
-    i <- 0
     for(samp in unique(plot_dt$sample)){ # generate a plot for each sample and store it
-      i <- i + 1
-      sel_col = colour[i]
-      
       sub_plot_dt <- plot_dt[sample == samp]
-      plot <- ggplot(sub_plot_dt, aes(x = as.factor(frame), y = mean_scaled_count)) +
-        geom_bar(stat = "identity", fill = sel_col, width = 0.8) +
-        geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
-                          ymax = mean_scaled_count + se_scaled_count),
-                      width = 0.35, linewidth = 1/2.134, na.rm = T, color = sel_col,
-                      show.legend = F) +
-        labs(title = samp, x = "Frame", y = "% P-sites") +
-        theme_bw() +
-        theme(legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+      
+      plot <- ggplot(sub_plot_dt, aes(as.factor(frame), length)) +
+        geom_tile(aes(fill = mean_scaled_count)) +
+        scale_fill_gradient("% P-sites", low = "white", high = colour,
+                            limits = c(zmin, zmax),
+                            breaks = c(zmin, zmin/2 + zmax/2, zmax),
+                            labels = c(round(zmin), round(zmin/2 + zmax/2), round(zmax))) +
+        labs(title = samp, x = "Frame", y = "Read length") +
+        ttheme_bw() +
+        theme(legend.position = "right", legend.key.size = unit(12, "pt"),
+              legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
               legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
               axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
               axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
@@ -768,7 +803,9 @@ frame_psite_length <- function(data, annotation, sample,
               line = element_line(linewidth = 1/2.134),
               panel.background = element_blank(), plot.background = element_blank(),
               legend.background = element_blank(), legend.box.background = element_blank(),
-              panel.grid = element_blank())
+              panel.grid = element_blank()) +
+        scale_y_continuous(limits = c(minlen - 0.5, maxlen + 0.5),
+                           breaks = seq(minlen + ((minlen) %% 2),maxlen,by = max(2, floor((maxlen - minlen) / 7))))
       
       if(identical(region, "all")) {
         plot <- plot + facet_grid(. ~ region) +
@@ -776,36 +813,26 @@ frame_psite_length <- function(data, annotation, sample,
                                   total_height = unit(3, "cm")) + 
           theme(strip.background = element_blank(),
                 strip.text = element_text(size = 8, family = "ArialMT", colour = "black"))
+      } else {
+        plot <- plot +
+          ggh4x::force_panelsizes(total_width = unit(3, "cm"), 
+                                  total_height = unit(3, "cm"))
       }
       
       output[[paste0("plot_", samp)]] <- plot
     }
-  } else {
-    
-    if(identical(plot_style, "mirror")) {
-      plot_dt[sample == unique(plot_dt$sample)[2], mean_scaled_count := -mean_scaled_count]
-    }
-    
-    plot <- ggplot(plot_dt, aes(x = as.factor(frame), y = mean_scaled_count, fill = sample))
-    
-    if(plot_style %in% c("facet", "mirror")) {
-      plot <- plot + geom_bar(stat = "identity", width = 0.8) +
-        geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
-                          ymax = mean_scaled_count + se_scaled_count, color = sample),
-                      width = 0.35, linewidth = 1/2.134, na.rm = T)
-      if(identical(plot_style, "mirror")){
-        plot <- plot + geom_hline(yintercept = 0, linetype = 2, color = "gray20", linewidth = 1/2.134)
-      }
-    } else {
-      plot <- plot + geom_bar(stat = "identity", position = position_dodge(0.9)) +
-        geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
-                          ymax = mean_scaled_count + se_scaled_count, color = sample),
-                      width = 0.35, linewidth = 1/2.134, na.rm = T, position = position_dodge(0.9))
-    }
-    
-    plot <- plot + labs(x = "Frame", y = "% P-sites") +
+  }  else {
+    plot <- ggplot(plot_dt, aes(frame, length)) +
+      geom_tile(aes(fill = mean_scaled_count)) +
+      scale_fill_gradient("% P-sites", low = "white", high = colour,
+                          limits = c(zmin, zmax),
+                          breaks = c(zmin, zmin/2 + zmax/2, zmax),
+                          labels = c(round(zmin), round(zmin/2 + zmax/2), round(zmax))) +
+      labs(x = "Frame", y = "Read length") +
       theme_bw() +
-      theme(legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+      theme(legend.position = "top", legend.margin=margin(0,0,0,0), legend.box.margin=margin(5,0,-5,0),
+            legend.key.size = unit(12, "pt"),
+            legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
             legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
             axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
             axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
@@ -816,34 +843,26 @@ frame_psite_length <- function(data, annotation, sample,
             panel.background = element_blank(), plot.background = element_blank(),
             legend.background = element_blank(), legend.box.background = element_blank(),
             panel.grid = element_blank()) +
-      scale_fill_manual(values = colour) + 
-      scale_color_manual(values = colour) +
-      scale_y_continuous(labels = abs)
-    
-    if(uniqueN(colour) > 1 & plot_style != "facet"){
-      plot <- plot + theme(legend.position = "right", legend.title = element_blank(),
-                           legend.background = element_blank())
-    } else {
-      plot <- plot + theme(legend.position = "none")
-    }
+      scale_y_continuous(limits = c(minlen - 0.5, maxlen + 0.5),
+                         breaks = seq(minlen + ((minlen) %% 2),maxlen,by = max(2, floor((maxlen - minlen) / 7))))
     
     if(identical(region, "all")) {
       if(identical(plot_style, "facet")){
         plot <- plot + facet_grid(sample ~ region) +
           ggh4x::force_panelsizes(total_width = unit(9, "cm"), 
-                                  total_height = unit(6, "cm"))
+                                  total_height = unit(length(unique(plot_dt$sample))*3, "cm"))
       } else {
         plot <- plot + facet_grid(. ~ region) +
           ggh4x::force_panelsizes(total_width = unit(9, "cm"), 
-                                  total_height = unit(5, "cm"))
+                                  total_height = unit(3, "cm"))
       }
       plot <- plot + theme(strip.background = element_blank(),
                            strip.text = element_text(size = 8, family = "ArialMT", colour = "black"))
     } else {
       if(identical(plot_style, "facet")){
-        plot <- plot + facet_wrap(sample ~ ., ncol = ceiling(sqrt(length(sample)))) +
+        plot <- plot + facet_wrap(sample ~ .) +
           ggh4x::force_panelsizes(total_width = unit(length(unique(plot_dt$sample))*3, "cm"), 
-                                  total_height = unit(5, "cm"))
+                                  total_height = unit(3, "cm"))
       }
       plot <- plot + theme(strip.background = element_blank(),
                            strip.text = element_text(size = 8, family = "ArialMT", colour = "black"))
@@ -855,3 +874,4 @@ frame_psite_length <- function(data, annotation, sample,
   options(warn = oldw)
   return(output)
 }
+
