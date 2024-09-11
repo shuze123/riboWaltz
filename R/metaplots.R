@@ -398,12 +398,13 @@ metaprofile_psite <- function(data, annotation, sample, multisamples = "average"
                                    fill = sel_col, color = NA, alpha = 0.20, show.legend = F)
       }
       
-      plot <- plot + geom_vline(data = linered, aes(xintercept = line), linetype = 1, color = "red") +
+      plot <- plot + geom_vline(data = linered, aes(xintercept = line), linetype = 1, color = "red", linewidth = 1/2.134) +
         theme_bw() +
         facet_grid(. ~ region, switch = "x", scales = "free_x") +
-        ggh4x::force_panelsizes(total_width = unit(6, "cm"), 
+        ggh4x::force_panelsizes(total_width = unit(10, "cm"), 
                                 total_height = unit(4, "cm")) +
-        theme(strip.background = element_blank(), strip.placement = "outside",
+        theme(panel.grid.major.x = element_blank(), panel.grid.minor = element_blank(),
+              strip.background = element_blank(), strip.placement = "outside",
               strip.text = element_text(size = 8, family = "ArialMT", colour = "black"),
               axis.title.x = element_blank(), legend.key.size = unit(12, "pt"),
               legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
@@ -414,9 +415,8 @@ metaprofile_psite <- function(data, annotation, sample, multisamples = "average"
               plot.title = element_text(size = 10, hjust = 0.5, family = "ArialMT", colour = "black"),
               line = element_line(linewidth = 1/2.134),
               panel.background = element_blank(), plot.background = element_blank(),
-              legend.background = element_blank(), legend.box.background = element_blank(),
-              panel.grid = element_blank()) +
-        geom_vline(data = lines3nt, aes(xintercept = line), linetype = 3, color = "gray60", linewidth = 1/2.134) +
+              legend.background = element_blank(), legend.box.background = element_blank()) +
+        geom_vline(data = lines3nt, aes(xintercept = line), linetype = 3, color = "grey", linewidth = 0.8/2.134) +
         labs(title = samp, y = y_title)
       
       output[[paste0("plot_", samp)]] <- plot
@@ -441,16 +441,17 @@ metaprofile_psite <- function(data, annotation, sample, multisamples = "average"
       theme_bw()
     
     if(plot_style == "facet"){
-      plot <- plot + facet_grid(sample ~ region, switch = "x", scales = "free_x") +
-        ggh4x::force_panelsizes(total_width = unit(8, "cm"), 
+      plot <- plot + facet_grid(sample ~ region, switch = "x", scales = "free_x")+
+        ggh4x::force_panelsizes(total_width = unit(10, "cm"), 
                                 total_height = unit(length(unique(plot_dt$sample))*4, "cm"))
     } else {
       plot <- plot + facet_grid(. ~ region, switch = "x", scales = "free_x") +
-        ggh4x::force_panelsizes(total_width = unit(8, "cm"), 
+        ggh4x::force_panelsizes(total_width = unit(10, "cm"), 
                                 total_height = unit(6, "cm"))
     }
     
-    plot <- plot + theme(strip.background = element_blank(), strip.placement = "outside",
+    plot <- plot + theme(panel.grid.major.x = element_blank(), panel.grid.minor = element_blank(),
+                         strip.background = element_blank(), strip.placement = "outside",
                          strip.text = element_text(size = 8, family = "ArialMT", colour = "black"),
                          axis.title.x = element_blank(), legend.key.size = unit(12, "pt"),
                          legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
@@ -461,15 +462,14 @@ metaprofile_psite <- function(data, annotation, sample, multisamples = "average"
                          plot.title = element_text(size = 10, hjust = 0.5, family = "ArialMT", colour = "black"),
                          line = element_line(linewidth = 1/2.134),
                          panel.background = element_blank(), plot.background = element_blank(),
-                         legend.background = element_blank(), legend.box.background = element_blank(),
-                         panel.grid = element_blank()) +
+                         legend.background = element_blank(), legend.box.background = element_blank()) +
       scale_fill_manual(values = colour) + 
       scale_color_manual(values = colour) +
       scale_y_continuous(labels = abs) +
-      geom_vline(data = lines3nt, aes(xintercept = line), linetype = 3, color = "gray60", linewidth = 1/2.134)
+      geom_vline(data = lines3nt, aes(xintercept = line), linetype = 3, color = "grey", linewidth = 0.8/2.134)
     
     if(uniqueN(colour) > 1 & plot_style != "facet"){
-      plot <- plot + theme(legend.position = c(0.98,1), legend.justification = c(1, 1),
+      plot <- plot + theme(legend.position = c(1.01,1.03), legend.justification = c(1, 1),
                            legend.title = element_blank(), legend.background = element_blank())
     } else {
       plot <- plot + theme(legend.position = "none")
