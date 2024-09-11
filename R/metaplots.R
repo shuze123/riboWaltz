@@ -453,8 +453,7 @@ metaprofile_psite <- function(data, annotation, sample, multisamples = "average"
     plot <- plot + theme(strip.background = element_blank(), strip.placement = "outside",
                          strip.text = element_text(size = 8, family = "ArialMT", colour = "black"),
                          axis.title.x = element_blank(), legend.key.size = unit(12, "pt"),
-                         legend.text = element_text(size = 8, family = "ArialMT", colour = "black",
-                                                    margin = margin(l = 0, unit = "pt")),
+                         legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
                          axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
                          axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
                          axis.text.x = element_text(size = 8, family = "ArialMT", colour = "black"),
@@ -810,14 +809,24 @@ metaheatmap_psite <- function(data, annotation, sample, multisamples = "average"
   options(warn=-1)
   
   plot <- ggplot(plot_dt, aes(as.numeric(as.character(distance)), sample)) +
-    geom_vline(data = lines3nt, aes(xintercept = line), linetype = 3, color = "gray60") +
-    geom_vline(data = linered, aes(xintercept = line), linetype = 1, color = "red") +
+    geom_vline(data = lines3nt, aes(xintercept = line), linetype = 3, color = "gray60", linewidth = 1/2.134) +
+    geom_vline(data = linered, aes(xintercept = line), linetype = 1, color = "red", linewidth = 1/2.134) +
     geom_tile(aes(fill = mean_scaled_count), height = 0.75) +
     theme_bw(base_size = 30) +
-    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-          strip.placement = "outside", axis.title = element_blank(),
-          plot.title = element_blank(), strip.background = element_blank()) +
-    facet_grid(. ~ region, scales = "free", switch = "x")
+    theme(strip.placement = "outside", axis.title = element_blank(),
+          plot.title = element_blank(), strip.background = element_blank(),
+          strip.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+          legend.key.size = unit(12, "pt"),
+          legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+          axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+          axis.text.x = element_text(size = 8, family = "ArialMT", colour = "black"),
+          axis.text.y = element_text(size = 8, family = "ArialMT", colour = "black"),
+          line = element_line(linewidth = 1/2.134),
+          panel.background = element_blank(), plot.background = element_blank(),
+          legend.background = element_blank(), legend.box.background = element_blank()) +
+    facet_grid(. ~ region, scales = "free", switch = "x") +
+    ggh4x::force_panelsizes(total_width = unit(8, "cm"), 
+                            total_height = unit(length(unique(plot_dt$sample))*2, "cm"))
   
   if(log_colour == F) {
     minl <- min(plot_dt$mean_scaled_count)
