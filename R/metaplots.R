@@ -390,8 +390,8 @@ metaprofile_psite <- function(data, annotation, sample, multisamples = "average"
       
       sub_plot_dt <- plot_dt[sample == samp]
       plot <- ggplot(sub_plot_dt, aes(distance, mean_scaled_count)) +
-        geom_line(linewidth = 1.50, color = sel_col)
-        
+        geom_line(linewidth = 1/2.134, color = sel_col)
+      
       if(!is.na(sub_plot_dt$se_scaled_count[1])){
         plot <- plot + geom_ribbon(aes(ymin = mean_scaled_count - se_scaled_count,
                                        ymax = mean_scaled_count + se_scaled_count),
@@ -399,14 +399,27 @@ metaprofile_psite <- function(data, annotation, sample, multisamples = "average"
       }
       
       plot <- plot + geom_vline(data = linered, aes(xintercept = line), linetype = 1, color = "red") +
-        theme_bw(base_size = 30) +
+        theme_bw() +
         facet_grid(. ~ region, switch = "x", scales = "free_x") +
-        theme(panel.grid.major.x = element_blank(), panel.grid.minor = element_blank(),
-              axis.title.x = element_blank(), plot.title = element_text(hjust = 0.5),
-              strip.background = element_blank(), strip.placement = "outside") +
-        geom_vline(data = lines3nt, aes(xintercept = line), linetype = 3, color = "gray60") +
+        ggh4x::force_panelsizes(total_width = unit(6, "cm"), 
+                                total_height = unit(4, "cm")) +
+        theme(strip.background = element_blank(), strip.placement = "outside",
+              strip.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+              axis.title.x = element_blank(), legend.key.size = unit(12, "pt"),
+              legend.text = element_text(size = 8, family = "ArialMT", colour = "black",
+                                         margin = margin(l = 0, unit = "pt")),
+              axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+              axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+              axis.text.x = element_text(size = 8, family = "ArialMT", colour = "black"),
+              axis.text.y = element_text(size = 8, family = "ArialMT", colour = "black"),
+              plot.title = element_text(size = 10, hjust = 0.5, family = "ArialMT", colour = "black"),
+              line = element_line(linewidth = 1/2.134),
+              panel.background = element_blank(), plot.background = element_blank(),
+              legend.background = element_blank(), legend.box.background = element_blank(),
+              panel.grid = element_blank()) +
+        geom_vline(data = lines3nt, aes(xintercept = line), linetype = 3, color = "gray60", linewidth = 1/2.134) +
         labs(title = samp, y = y_title)
-
+      
       output[[paste0("plot_", samp)]] <- plot
     }
   } else {
@@ -415,32 +428,47 @@ metaprofile_psite <- function(data, annotation, sample, multisamples = "average"
     }
     
     plot <- ggplot(plot_dt, aes(distance, mean_scaled_count, color = sample, fill = sample)) +
-      geom_line(linewidth = 1.50) +
+      geom_line(linewidth = 1/2.134) +
       geom_ribbon(aes(ymin = mean_scaled_count - se_scaled_count,
                       ymax = mean_scaled_count + se_scaled_count),
                   color = NA, alpha = 0.20, show.legend = F)
     
     if(identical(plot_style, "mirror")){
-      plot <- plot + geom_hline(yintercept = 0, linetype = 2, color = "gray20")
+      plot <- plot + geom_hline(yintercept = 0, linetype = 2, color = "gray20", linewidth = 1/2.134)
     }
     
     plot <- plot + labs(y = y_title) +
-      geom_vline(data = linered, aes(xintercept = line), linetype = 1, color = "red") +
-      theme_bw(base_size = 30)
+      geom_vline(data = linered, aes(xintercept = line), linetype = 1, color = "red", linewidth = 1/2.134) +
+      theme_bw()
     
     if(plot_style == "facet"){
-      plot <- plot + facet_grid(sample ~ region, switch = "x", scales = "free_x")
+      plot <- plot + facet_grid(sample ~ region, switch = "x", scales = "free_x") +
+        ggh4x::force_panelsizes(total_width = unit(8, "cm"), 
+                                total_height = unit(length(unique(plot_dt$sample))*4, "cm"))
     } else {
-      plot <- plot + facet_grid(. ~ region, switch = "x", scales = "free_x")
+      plot <- plot + facet_grid(. ~ region, switch = "x", scales = "free_x") +
+        ggh4x::force_panelsizes(total_width = unit(8, "cm"), 
+                                total_height = unit(6, "cm"))
     }
-      
-    plot <- plot + theme(panel.grid.major.x = element_blank(), panel.grid.minor = element_blank(),
-                         axis.title.x = element_blank(), plot.title = element_text(hjust = 0.5),
-                         strip.background = element_blank(), strip.placement = "outside") +
+    
+    plot <- plot + theme(strip.background = element_blank(), strip.placement = "outside",
+                         strip.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+                         axis.title.x = element_blank(), legend.key.size = unit(12, "pt"),
+                         legend.text = element_text(size = 8, family = "ArialMT", colour = "black",
+                                                    margin = margin(l = 0, unit = "pt")),
+                         axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+                         axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+                         axis.text.x = element_text(size = 8, family = "ArialMT", colour = "black"),
+                         axis.text.y = element_text(size = 8, family = "ArialMT", colour = "black"),
+                         plot.title = element_text(size = 10, hjust = 0.5, family = "ArialMT", colour = "black"),
+                         line = element_line(linewidth = 1/2.134),
+                         panel.background = element_blank(), plot.background = element_blank(),
+                         legend.background = element_blank(), legend.box.background = element_blank(),
+                         panel.grid = element_blank()) +
       scale_fill_manual(values = colour) + 
       scale_color_manual(values = colour) +
       scale_y_continuous(labels = abs) +
-      geom_vline(data = lines3nt, aes(xintercept = line), linetype = 3, color = "gray60")
+      geom_vline(data = lines3nt, aes(xintercept = line), linetype = 3, color = "gray60", linewidth = 1/2.134)
     
     if(uniqueN(colour) > 1 & plot_style != "facet"){
       plot <- plot + theme(legend.position = c(0.98,1), legend.justification = c(1, 1),
@@ -448,13 +476,14 @@ metaprofile_psite <- function(data, annotation, sample, multisamples = "average"
     } else {
       plot <- plot + theme(legend.position = "none")
     }
-  
+    
     output[["plot"]] <- plot
   }
   
   options(warn = oldw)
   return(output)
 }
+
 
 #' Ribosome occupancy metaheatmaps at single-nucleotide resolution.
 #'
