@@ -779,7 +779,7 @@ codon_usage_psite <- function(data, annotation, sample, multisamples = "average"
         sub_plot_dt <- plot_dt[sample == samp
         ][order(mean_scaled_count)
         ][, codon_aa := paste0(codon, "-", aa)
-          ][, codon_aa := factor(codon_aa, levels = codon_aa)]
+        ][, codon_aa := factor(codon_aa, levels = codon_aa)]
         
         colour_codon <- ifelse(sub_plot_dt$codon == "AUG", "#333f50",
                                ifelse(sub_plot_dt$codon %in% c("UAA", "UGA", "UAG"),
@@ -790,29 +790,38 @@ codon_usage_psite <- function(data, annotation, sample, multisamples = "average"
           geom_bar(stat = "identity", alpha = 1, color = "white") +
           geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
                             ymax = mean_scaled_count + se_scaled_count, color = class),
-                        width = 0.35, linewidth = 1.1, na.rm = T, show.legend = F)
-          
-          if(include_stop_codons == TRUE){
-            plot <- plot + scale_fill_manual(breaks = c("Start codon","Stop codon"), 
-                                             values = c("#333f50", "#8f1115"), limits = c("Start codon","Stop codon")) +
-              scale_color_manual(breaks = c("Start codon","Stop codon"), 
-                                 values = c("#333f50", "#8f1115"), limits = c("Start codon","Stop codon"))
-          } else {
-            plot <- plot + scale_fill_manual(breaks = c("Start codon", "CDS"),
-                                             values = c("#333f50", "gray40"), limits = c("Start codon", "CDS")) +
-              scale_color_manual(breaks = c("Start codon", "CDS"), 
-                                 values = c("#333f50", "gray40"), limits = c("Start codon", "CDS"))
-          }
-              
-          plot <- plot + theme_bw(base_size = bs) +
-          theme(legend.position = "top", legend.margin=margin(0,0,0,0), legend.box.margin=margin(5,0,-15,0),
-                legend.text = element_text(margin = margin(l = -8, unit = "pt")),
+                        width = 0.35, linewidth = 1/2.134, na.rm = T, show.legend = F)
+        
+        if(include_stop_codons == TRUE){
+          plot <- plot + scale_fill_manual(breaks = c("Start codon","Stop codon"), 
+                                           values = c("#333f50", "#8f1115"), limits = c("Start codon","Stop codon")) +
+            scale_color_manual(breaks = c("Start codon","Stop codon"), 
+                               values = c("#333f50", "#8f1115"), limits = c("Start codon","Stop codon"))
+        } else {
+          plot <- plot + scale_fill_manual(breaks = c("Start codon", "CDS"),
+                                           values = c("#333f50", "gray40"), limits = c("Start codon", "CDS")) +
+            scale_color_manual(breaks = c("Start codon", "CDS"), 
+                               values = c("#333f50", "gray40"), limits = c("Start codon", "CDS"))
+        }
+        
+        plot <- plot + theme_bw() +
+          theme(legend.position = "top", legend.margin=margin(0,0,0,0), legend.box.margin=margin(5,0,-5,0),
                 legend.title = element_blank(),
-                axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = bs * 0.5, colour = colour_codon),
-                panel.grid.major.x = element_blank(), panel.grid.minor.y = element_blank(),
-                plot.title = element_text(hjust = 0.5)) +
+                axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 8, family = "ArialMT", colour = colour_codon),
+                legend.key.size = unit(12, "pt"),
+                legend.text = element_text(size = 8, family = "ArialMT", colour = "black", margin = margin(l = 0, unit = "pt")),
+                axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+                axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+                axis.text.y = element_text(size = 8, family = "ArialMT", colour = "black"),
+                plot.title = element_text(size = 10, hjust = 0.5, family = "ArialMT", colour = "black"),
+                line = element_line(linewidth = 1/2.134),
+                panel.background = element_blank(), plot.background = element_blank(),
+                legend.background = element_blank(), legend.box.background = element_blank(),
+                panel.grid = element_blank()) +
           labs(title = samp, x = "Codon") +
-          scale_y_continuous("Usage index", limits = c(0, 1.025), breaks = seq(0, 1, 0.25))
+          scale_y_continuous("Usage index", limits = c(0, 1.025), breaks = seq(0, 1, 0.25)) +
+          ggh4x::force_panelsizes(total_width = unit(15, "cm"), 
+                                  total_height = unit(3, "cm"))
         output[[paste0("plot_", samp)]] <- plot
       }
     } else {
@@ -829,7 +838,7 @@ codon_usage_psite <- function(data, annotation, sample, multisamples = "average"
         geom_bar(stat = "identity", alpha = 1, color = "white") +
         geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
                           ymax = mean_scaled_count + se_scaled_count, color = class),
-                      width = 0.35, linewidth = 1.1, na.rm = T, show.legend = F)
+                      width = 0.35, linewidth = 1/2.134, na.rm = T, show.legend = F)
       
       if(include_stop_codons == TRUE){
         plot <- plot + scale_fill_manual(breaks = c("Start codon","Stop codon"), 
@@ -843,15 +852,26 @@ codon_usage_psite <- function(data, annotation, sample, multisamples = "average"
                              values = c("#333f50", "gray40"), limits = c("Start codon", "CDS"))
       }
       
-      plot <- plot + theme_bw(base_size = bs) +
+      plot <- plot + theme_bw() +
         facet_grid(sample ~ ., switch = "x") +
-        theme(legend.position = "top", legend.margin=margin(0,0,0,0), legend.box.margin=margin(5,0,-15,0),
-              legend.text = element_text(margin = margin(l = -12, unit = "pt")),
+        theme(legend.position = "top", legend.margin=margin(0,0,0,0), legend.box.margin=margin(5,0,-5,0),
               legend.title = element_blank(), strip.background = element_blank(),
-              axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = bs * 0.5, colour = colour_codon),
-              panel.grid.major.x = element_blank(), panel.grid.minor.y = element_blank()) +
+              strip.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+              axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 8, family = "ArialMT", colour = colour_codon),
+              legend.key.size = unit(12, "pt"),
+              legend.text = element_text(size = 8, family = "ArialMT", colour = "black", margin = margin(l = 0, unit = "pt")),
+              axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+              axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+              axis.text.y = element_text(size = 8, family = "ArialMT", colour = "black"),
+              plot.title = element_text(size = 10, hjust = 0.5, family = "ArialMT", colour = "black"),
+              line = element_line(linewidth = 1/2.134),
+              panel.background = element_blank(), plot.background = element_blank(),
+              legend.background = element_blank(), legend.box.background = element_blank(),
+              panel.grid = element_blank()) +
         labs(x = "Codon") +
-        scale_y_continuous("Usage index", limits = c(0, 1.025), breaks = seq(0, 1, 0.25))
+        scale_y_continuous("Usage index", limits = c(0, 1.025), breaks = seq(0, 1, 0.25)) +
+        ggh4x::force_panelsizes(total_width = unit(15, "cm"), 
+                                total_height = unit(length(unique(plot_dt$sample))*3, "cm"))
       output[["plot"]] <- plot
     }
   } else {
@@ -860,8 +880,8 @@ codon_usage_psite <- function(data, annotation, sample, multisamples = "average"
     bs <- 25
     plot <- ggplot(plot_dt, aes(x = mean_scaled_count, y = scaled_user_count, colour = class)) +
       geom_smooth(method = "lm", se = T, color = "gray80", fill = "gray80", linetype = 1,
-                  formula = y ~ x, level = 0.99,  fullrange = TRUE) +
-      geom_point(alpha = 0.9, size = bs * 0.14)
+                  formula = y ~ x, level = 0.99,  fullrange = TRUE, linewidth = 1/2.134) +
+      geom_point(alpha = 0.9, size = 8/2.8)
     
     if(include_stop_codons == TRUE){
       plot <- plot + scale_colour_manual(breaks = c("Start codon","Stop codon"),
@@ -871,15 +891,25 @@ codon_usage_psite <- function(data, annotation, sample, multisamples = "average"
                                         values = c("#333f50", "gray40"), limits = c("Start codon", "CDS"))
     }
     
-    plot <- plot + theme_bw(base_size = bs) +
-      theme(legend.position = "top", legend.margin=margin(0,0,0,0), legend.box.margin=margin(5,0,-15,0),
-            legend.text = element_text(margin = margin(l = -12, unit = "pt")),
-            panel.grid.minor = element_blank(), legend.title = element_blank()) +
+    plot <- plot + theme_bw() +
+      theme(legend.position = "top", legend.margin=margin(0,0,0,0), legend.box.margin=margin(5,0,-5,0),
+            legend.text = element_text(size = 8, family = "ArialMT", colour = "black", margin = margin(l = 0, unit = "pt")),
+            legend.key.size = unit(12, "pt"), legend.title = element_blank(),
+            axis.title = element_text(size = 10, family = "ArialMT", colour = "black"),
+            axis.text = element_text(size = 8, family = "ArialMT", colour = "black"),
+            axis.text.y = element_text(size = 8, family = "ArialMT", colour = "black"),
+            plot.title = element_text(size = 10, hjust = 0.5, family = "ArialMT", colour = "black"),
+            line = element_line(linewidth = 1/2.134),
+            panel.background = element_blank(), plot.background = element_blank(),
+            legend.background = element_blank(), legend.box.background = element_blank(),
+            panel.grid = element_blank()) +
       scale_x_continuous(limits = c(-0.3,1.3), breaks = seq(0, 1, 0.25), expand = c(0,0)) +
       scale_y_continuous(limits = c(-0.3,1.3), breaks = seq(0, 1, 0.25), expand = c(0,0)) +
       coord_cartesian(xlim = c(-0.05, 1.05), ylim = c(-0.05, 1.05)) +
       annotate("text", x = 1, y = 0, label = paste0("R=",correlation),
-               vjust = -0.2, size = bs * 0.2, hjust = 1, color = "black")
+               vjust = -0.2, size = 10/2.8, hjust = 1, color = "black") +
+      ggh4x::force_panelsizes(total_width = unit(8, "cm"), 
+                              total_height = unit(8, "cm"))
     
     if(length(contrast_sample) == 1){
       plot <- plot + labs(x = contrast_sample, y = "User value")
@@ -921,7 +951,7 @@ codon_usage_psite <- function(data, annotation, sample, multisamples = "average"
       plot <- plot +
         ggrepel::geom_text_repel(data = lab_table, 
                                  aes_string("mean_scaled_count", "scaled_user_count",
-                                            label = as.character(label_col)), show.legend = F)
+                                            label = as.character(label_col)), show.legend = F, size = 8/2.8)
     }
     
     output[["plot"]] <- plot
