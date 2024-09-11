@@ -111,7 +111,7 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
     data_tmp <- list()
     for(i in names(data)){
       data_tmp[[i]] <- as.data.table(data[[i]])[, c("width", "strand") := NULL
-      ][, seqnames := as.character(seqnames)]
+                                                ][, seqnames := as.character(seqnames)]
       setnames(data_tmp[[i]], c("seqnames", "start", "end"), c("transcript", "end5", "end3"))
     }
     data <- data_tmp
@@ -204,7 +204,7 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
   
   # select transcripts
   l_transcripts <- as.character(annotation[l_utr5 > 0 & l_cds > 0 &
-                                             l_cds %% 3 == 0 & l_utr3 > 0,
+                                           l_cds %% 3 == 0 & l_utr3 > 0,
                                            transcript])
   
   if (length(transcripts) == 0) {
@@ -217,7 +217,7 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
   if(length(length_range) == 0){
     for(samp in as.character(unlist(sample))){
       dt <- data[[samp]][transcript %in% c_transcripts]
-      
+
       if(length(length_range) == 0){
         length_range <- seq(quantile(dt$length, (1 - cl/100)/2),
                             quantile(dt$length, 1 - (1 - cl/100)/2))
@@ -228,7 +228,7 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
       }
     }
   }
-  
+
   xmin = min(length_range)
   xmax = max(length_range)
   
@@ -289,8 +289,8 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
     frame_dt <- frame_dt[CJ(psite_region = unique(psite_region), frame = c(0, 1, 2)),
                          list(count = .N), by = .EACHI]
     frame_dt <- frame_dt[, scaled_count := (count / sum(count)) * 100, by = .(region = psite_region)
-    ][is.na(scaled_count), scaled_count := 0]
-    
+                         ][is.na(scaled_count), scaled_count := 0]
+
     frame_dt[, tmp_samp := samp]
     
     final_dt <- rbind(final_dt, frame_dt)
@@ -298,11 +298,11 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
   
   if(identical(region, "all")){
     final_dt[, psite_region := factor(psite_region,
-                                      levels = c("5utr", "cds", "3utr"),
-                                      labels = c("5' UTR", "CDS", "3' UTR"))]
+                                levels = c("5utr", "cds", "3utr"),
+                                labels = c("5' UTR", "CDS", "3' UTR"))]
   } else {
     final_dt[, psite_region := ifelse(psite_region == "5utr", "5' UTR",
-                                      ifelse(psite_region == "cds", "CDS", "3' UTR"))]
+                               ifelse(psite_region == "cds", "CDS", "3' UTR"))]
   }
   
   final_dt <- final_dt[order(match(tmp_samp, as.character(unlist(sample))), psite_region, frame)]
@@ -335,7 +335,7 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
     
   } else {
     plot_dt <- final_dt[, sample := tmp_samp
-    ][, se_scaled_count := NA]
+                        ][, se_scaled_count := NA]
     setnames(plot_dt, "scaled_count", "mean_scaled_count")
     
     output[["plot_dt"]] <- copy(plot_dt[, c("sample", "region", "frame", "mean_scaled_count")])
@@ -392,20 +392,20 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
     
     plot <- ggplot(plot_dt, aes(x = as.factor(frame), y = mean_scaled_count, fill = sample))
     
-    if(plot_style %in% c("facet", "mirror")) {
-      plot <- plot + geom_bar(stat = "identity", width = 0.8) +
-        geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
-                          ymax = mean_scaled_count + se_scaled_count, color = sample),
-                      width = 0.35, linewidth = 1.1, na.rm = T)
-      if(identical(plot_style, "mirror")){
-        plot <- plot + geom_hline(yintercept = 0, linetype = 2, color = "gray20", linewidth = 1/2.134)
+      if(plot_style %in% c("facet", "mirror")) {
+        plot <- plot + geom_bar(stat = "identity", width = 0.8) +
+          geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
+                            ymax = mean_scaled_count + se_scaled_count, color = sample),
+                        width = 0.35, linewidth = 1.1, na.rm = T)
+        if(identical(plot_style, "mirror")){
+          plot <- plot + geom_hline(yintercept = 0, linetype = 2, color = "gray20", linewidth = 1/2.134)
+        }
+      } else {
+        plot <- plot + geom_bar(stat = "identity", position = position_dodge(0.9)) +
+          geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
+                            ymax = mean_scaled_count + se_scaled_count, color = sample),
+                        width = 0.35, linewidth = 1.1, na.rm = T, position = position_dodge(0.9))
       }
-    } else {
-      plot <- plot + geom_bar(stat = "identity", position = position_dodge(0.9)) +
-        geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
-                          ymax = mean_scaled_count + se_scaled_count, color = sample),
-                      width = 0.35, linewidth = 1.1, na.rm = T, position = position_dodge(0.9))
-    }
     
     plot <- plot + labs(x = "Frame", y = "% P-sites") +
       theme_bw() +
@@ -564,13 +564,6 @@ frame_psite <- function(data, annotation, sample, multisamples = "average",
 #' @import data.table
 #' @import ggplot2
 #' @export
-frames_stratified <- frame_psite_length(reads_psite_list, annotation_dt,
-                                        sample = input_samples,
-                                        multisamples = "average",
-                                        plot_style = "facet",
-                                        region = "all",
-                                        cl = 85, colour = "#172969")
-
 frame_psite_length <- function(data, annotation, sample,
                                multisamples = "average", plot_style = "split",
                                transcripts = NULL, region = "all",
@@ -581,7 +574,7 @@ frame_psite_length <- function(data, annotation, sample,
     data_tmp <- list()
     for(i in names(data)){
       data_tmp[[i]] <- as.data.table(data[[i]])[, c("width", "strand") := NULL
-      ][, seqnames := as.character(seqnames)]
+                                                ][, seqnames := as.character(seqnames)]
       setnames(data_tmp[[i]], c("seqnames", "start", "end"), c("transcript", "end5", "end3"))
     }
     data <- data_tmp
@@ -644,7 +637,7 @@ frame_psite_length <- function(data, annotation, sample,
   
   # select transcripts
   l_transcripts <- as.character(annotation[l_utr5 > 0 & l_cds > 0 &
-                                             l_cds %% 3 == 0 & l_utr3 > 0,
+                                           l_cds %% 3 == 0 & l_utr3 > 0,
                                            transcript])
   
   if (length(transcripts) == 0) {
@@ -657,7 +650,7 @@ frame_psite_length <- function(data, annotation, sample,
   if(length(length_range) == 0){
     for(samp in as.character(unlist(sample))){
       dt <- data[[samp]][transcript %in% c_transcripts]
-      
+
       if(length(length_range) == 0){
         length_range <- seq(quantile(dt$length, (1 - cl/100)/2),
                             quantile(dt$length, 1 - (1 - cl/100)/2))
@@ -717,7 +710,7 @@ frame_psite_length <- function(data, annotation, sample,
   for(samp in as.character(unlist(sample))) {
     
     frame_dt <- data[[samp]][length %in% length_range
-    ][transcript %in% c_transcripts]
+                             ][transcript %in% c_transcripts]
     
     if(!identical(region, "all")){
       frame_dt <- frame_dt[psite_region == region]
@@ -766,7 +759,7 @@ frame_psite_length <- function(data, annotation, sample,
     plot_dt <- final_dt[, .(mean_scaled_count = mean(scaled_count)), by = .(length, region, frame, sample)]
   } else {
     plot_dt <- final_dt[, sample := tmp_samp
-    ][, se_scaled_count := NA]
+                        ][, se_scaled_count := NA]
     setnames(plot_dt, "scaled_count", "mean_scaled_count")
   }
   
@@ -791,7 +784,7 @@ frame_psite_length <- function(data, annotation, sample,
                             breaks = c(zmin, zmin/2 + zmax/2, zmax),
                             labels = c(round(zmin), round(zmin/2 + zmax/2), round(zmax))) +
         labs(title = samp, x = "Frame", y = "Read length") +
-        ttheme_bw() +
+        theme_bw() +
         theme(legend.position = "right", legend.key.size = unit(12, "pt"),
               legend.title = element_text(size = 10, family = "ArialMT", colour = "black"),
               legend.text = element_text(size = 8, family = "ArialMT", colour = "black"),
