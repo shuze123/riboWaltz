@@ -310,7 +310,7 @@ region_psite <- function(data, annotation, sample, multisamples = "average",
       geom_errorbar(aes(ymin = mean_scaled_count - se_scaled_count,
                         ymax = mean_scaled_count + se_scaled_count,
                         color = region),
-                    width = 0.35, linewidth = 1.1, na.rm = T,
+                    width = 0.35, linewidth = 1/2.134, na.rm = T,
                     position = position_dodge(0.9), show.legend = F) +
       scale_color_manual(values = colour)
   }
